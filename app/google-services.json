@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "846619810567",
+    "firebase_url": "https://echotwin-a8d76.firebaseio.com",
+    "project_id": "echotwin-a8d76",
+    "storage_bucket": "echotwin-a8d76.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:846619810567:android:17106b5ed0fb4f28",
+        "android_client_info": {
+          "package_name": "com.echotwin.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "846619810567-hmqahp3c5mvefbarlihl9g01s5n541oe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.echotwin.android",
+            "certificate_hash": "58bec1f60decd81f7a654d5069fec6ec3682a84d"
+          }
+        },
+        {
+          "client_id": "846619810567-0hrm0j00cifqjil39vhjhelpe0u1e7di.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6HABXh031Jh_fhp7Is-UvZVLGzrMaPRo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "846619810567-0hrm0j00cifqjil39vhjhelpe0u1e7di.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
