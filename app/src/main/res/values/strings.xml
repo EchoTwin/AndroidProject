@@ -8,4 +8,5 @@
     <string name="play_button_description">Play button content description</string>
     <string name="upload_text">Upload</string>
     <string name="username">Username</string>
+    <string name="user_avatar_content_description">User avatar for voice recording</string>
 </resources>

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -20,7 +21,6 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -43,6 +43,7 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
 
     private Chronometer chronometer;
     private EditText usernameEditText;
+    private TextInputLayout usernameTextInput;
     private ImageView imageViewRecord, imageViewStop, imageViewPlay;
     private int RECORD_AUDIO_REQUEST_CODE = 123;
     private String filePath;
@@ -75,8 +76,11 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
         imageViewRecord = view.findViewById(R.id.imageViewRecord);
         imageViewStop = view.findViewById(R.id.imageViewStop);
         imageViewPlay = view.findViewById(R.id.imagePlayRecord);
-        usernameEditText = (EditText) view.findViewById(R.id.username_edit_text);
-        mSendData = (Button) view.findViewById(R.id.send_data);
+        usernameEditText = view.findViewById(R.id.username_edit_text);
+        mSendData = view.findViewById(R.id.send_data);
+        usernameTextInput = view.findViewById(R.id.username_text_input_layout);
+        usernameTextInput.setError("Username is required"); // show error
+        usernameTextInput.setError(null); // hide error
 
         imageViewRecord.setOnClickListener(this);
         imageViewStop.setOnClickListener(this);

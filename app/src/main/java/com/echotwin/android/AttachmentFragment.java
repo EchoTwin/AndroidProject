@@ -1,10 +1,7 @@
 package com.echotwin.android;
 
-
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,66 +15,52 @@ import android.widget.ImageView;
 
 import java.io.File;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AttachmentFragment extends Fragment implements Imageutils.ImageAttachmentListener{
-
+public class AttachmentFragment extends Fragment implements ImageUtils.ImageAttachmentListener {
 
     ImageView iv_attachment;
-
-    Imageutils imageutils;
+    ImageUtils imageutils;
 
     public AttachmentFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_attachment, container, false);
-
-        imageutils = new Imageutils(getActivity(),this,true);
-
-        iv_attachment = (ImageView)view.findViewById(R.id.imageView);
-
+        imageutils = new ImageUtils(getActivity(), this, true);
+        iv_attachment = view.findViewById(R.id.imageView);
         iv_attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageutils.imagepicker(1);
+                imageutils.imagepicker();
             }
         });
-
-
 
         return view;
     }
 
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d("Fragment", "onRequestPermissionsResult: "+requestCode);
-        imageutils.request_permission_result(requestCode, permissions, grantResults);
+        Log.d("Fragment", "onRequestPermissionsResult: " + requestCode);
+        imageutils.request_permission_result(requestCode, grantResults);
     }
 
     @Override
     public void image_attachment(int from, String filename, Bitmap file, Uri uri) {
-        Bitmap bitmap = file;
-        String file_name = filename;
         iv_attachment.setImageBitmap(file);
 
-        String path =  Environment.getExternalStorageDirectory() + File.separator + "ImageAttach" + File.separator;
-        imageutils.createImage(bitmap,file_name,path,false);
+        String path = Environment.getExternalStorageDirectory() + File.separator + "ImageAttach" + File.separator;
+        imageutils.createImage(file, filename, path);
 
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("Fragment", "onActivityResult: ");
         imageutils.onActivityResult(requestCode, resultCode, data);
 
