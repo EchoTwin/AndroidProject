@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/holo_purple"
     tools:layout_editor_absoluteY="25dp">
 
-    <com.github.zagum.speechrecognitionview.RecognitionProgressView
-        android:id="@+id/recognition_view"
-        android:layout_width="140dp"
-        android:layout_height="100dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!--<com.github.zagum.speechrecognitionview.RecognitionProgressView-->
+        <!--android:id="@+id/recognition_view"-->
+        <!--android:layout_width="140dp"-->
+        <!--android:layout_height="100dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginTop="32dp"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
+    <fragment
+        android:id="@+id/fragment"
+        class="com.echotwin.android.AttachmentFragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <Chronometer
         android:id="@+id/chronometerTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/fragment"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp"
+        android:textColor="@android:color/black"
         android:textSize="60sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recognition_view" />
+        tools:layout_editor_absoluteY="285dp" />
 
     <ImageView
         android:id="@+id/imageViewRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_below="@+id/chronometerTimer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="28dp"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:contentDescription="@string/record_button_description"
         android:focusable="true"
-        android:src="@drawable/ic_microphone"
+        android:src="@mipmap/ic_launcher_foreground"
+        android:tint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chronometerTimer" />
@@ -53,13 +63,15 @@
         android:id="@+id/imagePlayRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/imageViewStop"
+        android:layout_marginTop="27dp"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:contentDescription="@string/play_button_description"
         android:focusable="true"
         android:src="@drawable/ic_play"
+        android:tint="@color/colorPrimary"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@+id/imageViewRecord"
         app:layout_constraintTop_toTopOf="@+id/imageViewRecord" />
@@ -68,9 +80,9 @@
         android:id="@+id/imageViewStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_below="@+id/chronometerTimer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="37dp"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:contentDescription="@string/stop_button_description"
@@ -81,4 +93,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRecord" />
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/send_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageViewRecord"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:text="@string/upload_text"
+        android:background="@drawable/upload_button"
+        android:layout_marginTop="17dp" />
+
+
+</RelativeLayout>

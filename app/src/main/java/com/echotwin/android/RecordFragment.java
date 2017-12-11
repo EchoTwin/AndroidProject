@@ -1,14 +1,12 @@
 package com.echotwin.android;
 
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
@@ -17,16 +15,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.github.zagum.speechrecognitionview.RecognitionProgressView;
-import com.github.zagum.speechrecognitionview.adapters.RecognitionListenerAdapter;
+
+import com.firebase.client.Firebase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Created by kristo.prifti on 2017/11/26.
@@ -38,12 +42,14 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
     private MediaPlayer mPlayer;
 
     private Chronometer chronometer;
+    private EditText usernameEditText;
     private ImageView imageViewRecord, imageViewStop, imageViewPlay;
     private int RECORD_AUDIO_REQUEST_CODE = 123;
+    private String filePath;
+    private Button mSendData;
+    private Firebase mRef;
+    private StorageReference mStorageRef;
     private String fileName;
-
-    private SpeechRecognizer speechRecognizer;
-    private RecognitionProgressView recognitionProgressView;
 
     public RecordFragment() {
         // Required empty public constructor
@@ -58,51 +64,43 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View inflaterView = inflater.inflate(R.layout.fragment_record, container, false);
+        View view = inflater.inflate(R.layout.fragment_record, container, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getPermissionToRecordAudio();
         }
 
-        int[] colors = {
-                ContextCompat.getColor(getActivity(), R.color.color1),
-                ContextCompat.getColor(getActivity(), R.color.color2),
-                ContextCompat.getColor(getActivity(), R.color.color3),
-                ContextCompat.getColor(getActivity(), R.color.color4),
-                ContextCompat.getColor(getActivity(), R.color.color5)
-        };
-
-        int[] heights = {20, 24, 18, 23, 16};
-
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getActivity());
-
-        recognitionProgressView = inflaterView.findViewById(R.id.recognition_view);
-        recognitionProgressView.setSpeechRecognizer(speechRecognizer);
-        recognitionProgressView.setRecognitionListener(new RecognitionListenerAdapter() {
-            @Override
-            public void onResults(Bundle results) {
-                showResults(results);
-            }
-        });
-        recognitionProgressView.setColors(colors);
-        recognitionProgressView.setBarMaxHeightsInDp(heights);
-        recognitionProgressView.setCircleRadiusInDp(2);
-        recognitionProgressView.setSpacingInDp(2);
-        recognitionProgressView.setIdleStateAmplitudeInDp(2);
-        recognitionProgressView.setRotationRadiusInDp(10);
-        recognitionProgressView.play();
-
-        chronometer = inflaterView.findViewById(R.id.chronometerTimer);
+        chronometer = view.findViewById(R.id.chronometerTimer);
         chronometer.setBase(SystemClock.elapsedRealtime());
-        imageViewRecord = inflaterView.findViewById(R.id.imageViewRecord);
-        imageViewStop = inflaterView.findViewById(R.id.imageViewStop);
-        imageViewPlay = inflaterView.findViewById(R.id.imagePlayRecord);
+        imageViewRecord = view.findViewById(R.id.imageViewRecord);
+        imageViewStop = view.findViewById(R.id.imageViewStop);
+        imageViewPlay = view.findViewById(R.id.imagePlayRecord);
+        usernameEditText = (EditText) view.findViewById(R.id.username_edit_text);
+        mSendData = (Button) view.findViewById(R.id.send_data);
 
         imageViewRecord.setOnClickListener(this);
         imageViewStop.setOnClickListener(this);
         imageViewPlay.setOnClickListener(this);
 
-        return inflaterView;
+        Firebase.setAndroidContext(getActivity());
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        mRef = new Firebase("https://echotwin-a8d76.firebaseio.com/");
+
+        mSendData.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Firebase userId = mRef.child("12345");
+                Firebase username = userId.child("Username");
+                username.setValue(usernameEditText.getText().toString());
+                uploadFile();
+                Firebase voiceName = userId.child("VoiceName");
+                voiceName.setValue(fileName);
+//                Firebase pictureUrl = userId.child("PictureUrl");
+//                pictureUrl.setValue("picture");
+
+            }
+        });
+        return view;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -123,7 +121,7 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        // Make sure it's our original READ_CONTACTS request
+
         if (requestCode == RECORD_AUDIO_REQUEST_CODE) {
             if (grantResults.length == 3 &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED
@@ -140,46 +138,26 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
     public void onDestroy() {
         stopRecording();
         stopAudioPlay();
-        stopRecognition();
-        if (speechRecognizer != null) {
-            speechRecognizer.destroy();
-        }
+
         super.onDestroy();
     }
 
     @Override
     public void onClick(View view) {
-        if (view == imageViewRecord) {
-            prepareForRecording();
-            startRecording();
-            startRecognition();
-            recognitionProgressView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startRecognition();
-                }
-            }, 50);
-        } else if (view == imageViewStop) {
-            prepareForStop();
-            stopRecording();
-            stopRecognition();
-        } else if (view == imageViewPlay) {
-            startPlaying();
-            startRecognition();
-            recognitionProgressView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startRecognition();
-                }
-            }, 50);
-        }
-    }
+       if (view == imageViewRecord) {
+           prepareForRecording();
+           startRecording();
 
-    private void showResults(Bundle results) {
-        ArrayList<String> matches = results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        Toast.makeText(getActivity(), matches.get(0), Toast.LENGTH_LONG).show();
-    }
+           mSendData.setVisibility(View.GONE);
+       } else if (view == imageViewStop) {
+           prepareForStop();
+           stopRecording();
+
+           mSendData.setVisibility(View.VISIBLE);
+       } else if (view == imageViewPlay) {
+           startPlaying();
+       }
+ }
 
     private void prepareForRecording() {
         imageViewRecord.setVisibility(View.GONE);
@@ -187,23 +165,47 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
         imageViewStop.setVisibility(View.VISIBLE);
     }
 
+    private void uploadFile(){
+        File file = new File(filePath);
+
+        if (file.exists()) {
+            Log.d("RecordFragment", file.getName());
+            Uri fileUri = Uri.fromFile(file);
+            StorageReference riversRef = mStorageRef.child("Voices/"+ fileName);
+
+            riversRef.putFile(fileUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Log.d("RecordFragment", "Stana");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Log.d("RecordFragment", "Ne Stana");
+                        }
+                    });
+        }
+    }
+
     private void startRecording() {
         stopAudioPlay();
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        /*In the lines below, we create a directory VoiceRecorderSimplifiedCoding/Audios in the phone storage
-         * and the audios are being stored in the Audios folder **/
+
         File root = android.os.Environment.getExternalStorageDirectory();
         File file = new File(root.getAbsolutePath() + "/VoiceRecorderSimplifiedCoding/Audios");
         if (!file.exists()) {
             file.mkdirs();
         }
 
-        fileName = root.getAbsolutePath() + "/VoiceRecorderSimplifiedCoding/Audios/" +
-                String.valueOf(System.currentTimeMillis() + ".mp3");
-        Log.d("filename", fileName);
-        mRecorder.setOutputFile(fileName);
+        fileName = String.valueOf(System.currentTimeMillis() + ".mp3");
+        filePath = root.getAbsolutePath() + "/VoiceRecorderSimplifiedCoding/Audios/" +
+                fileName;
+        Log.d("filename", filePath);
+        mRecorder.setOutputFile(filePath);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -215,19 +217,6 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
 
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
-    }
-
-    private void startRecognition() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getActivity().getPackageName());
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en");
-        speechRecognizer.startListening(intent);
-    }
-
-    private void stopRecognition() {
-        speechRecognizer.stopListening();
-        recognitionProgressView.stop();
     }
 
     private void prepareForStop() {
@@ -263,7 +252,7 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
         mPlayer = new MediaPlayer();
         mPlayer.setOnCompletionListener(this);
         try {
-            mPlayer.setDataSource(fileName);
+            mPlayer.setDataSource(filePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
