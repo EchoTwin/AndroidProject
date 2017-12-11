@@ -8,4 +8,7 @@
     <color name="color3">#eeaa10</color>
     <color name="color4">#3164d7</color>
     <color name="color5">#2e9641</color>
+    <color name="color_launcher">#26A69A</color>
+    <color name="upload_focus">#20968b</color>
+    <color name="upload_pressed">#1a8a80</color>
 </resources>
