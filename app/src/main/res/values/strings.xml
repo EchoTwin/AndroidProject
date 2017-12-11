@@ -3,9 +3,4 @@
     <string name="action_settings">Settings</string>
     <string name="record_fragment">Record Fragment</string>
     <string name="tts_fragment">TTS Fragment</string>
-    <string name="record_button_description">Record image button to start recording</string>
-    <string name="stop_button_description">Stop image button to stop recording the voice</string>
-    <string name="play_button_description">Play button content description</string>
-    <string name="upload_text">Upload</string>
-    <string name="username">Username</string>
 </resources>

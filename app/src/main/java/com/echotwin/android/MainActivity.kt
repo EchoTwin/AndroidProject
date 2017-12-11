@@ -23,27 +23,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-//        val database = FirebaseDatabase.getInstance()
-//        val myRef = database.getReference("message")
-//
-//        myRef.setValue("Hello, World!")
+        val database = FirebaseDatabase.getInstance()
+        val myRef = database.getReference("message")
+
+        myRef.setValue("Hello, World!")
 
         setupViewPager(viewPager)
         tabLayout.setupWithViewPager(viewPager)
 
-//        myRef.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                // This method is called once with the initial value and again
-//                // whenever data at this location is updated.
-//                val value = dataSnapshot.getValue(String::class.java)
-//                Log.d(TAG, "Value is: " + value!!)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                // Failed to read value
-//                Log.w(TAG, "Failed to read value.", error.toException())
-//            }
-//        })
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                val value = dataSnapshot.getValue(String::class.java)
+                Log.d(TAG, "Value is: " + value!!)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException())
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
