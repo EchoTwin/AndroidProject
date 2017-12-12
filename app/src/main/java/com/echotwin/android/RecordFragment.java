@@ -1,5 +1,6 @@
 package com.echotwin.android;
 
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -26,6 +27,7 @@ import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -93,15 +95,18 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
         mSendData.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                Firebase userId = mRef.child("12345");
-                Firebase username = userId.child("Username");
-                username.setValue(usernameEditText.getText().toString());
-                uploadFile();
-                Firebase voiceName = userId.child("VoiceName");
-                voiceName.setValue(fileName);
-//                Firebase pictureUrl = userId.child("PictureUrl");
+                if (usernameEditText.getText().toString().matches("")) {
+                    usernameTextInput.setError("Username is required!");
+                } else {
+                    Firebase userId = mRef.push();
+                    Firebase username = userId.child("username");
+                    username.setValue(usernameEditText.getText().toString());
+                    uploadFile();
+                    Firebase voiceFileURL = userId.child("voiceFileURL");
+                    voiceFileURL.setValue(fileName);
+//                Firebase pictureUrl = userId.child("pictureFileURL");
 //                pictureUrl.setValue("picture");
-
+                }
             }
         });
         return view;
@@ -173,7 +178,10 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
         File file = new File(filePath);
 
         if (file.exists()) {
-            Log.d("RecordFragment", file.getName());
+            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle("Uploading voice file");
+            progressDialog.show();
+
             Uri fileUri = Uri.fromFile(file);
             StorageReference riversRef = mStorageRef.child("Voices/"+ fileName);
 
@@ -181,15 +189,30 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Me
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Log.d("RecordFragment", "Stana");
+                            progressDialog.dismiss();
+                            Toast.makeText(getActivity().getApplicationContext(), "Voice file uploaded", Toast.LENGTH_LONG).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            Log.d("RecordFragment", "Ne Stana");
+                            progressDialog.dismiss();
+                            Toast.makeText(getActivity().getApplicationContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            //calculating progress percentage
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                            //displaying percentage in progress dialog
+                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
                         }
                     });
+        } else {
+            //you can display an error toast
+            Toast.makeText(getActivity().getApplicationContext(), "Voice file not found!!!", Toast.LENGTH_LONG).show();
         }
     }
 
