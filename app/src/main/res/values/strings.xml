@@ -9,4 +9,11 @@
     <string name="upload_text">Upload</string>
     <string name="username">Username</string>
     <string name="user_avatar_content_description">User avatar for voice recording</string>
+    <string name="title_activity_tts">Text To Speech</string>
+    <string name="title_activity_record">Record your voice</string>
+    <string name="select_voice">Select voice</string>
+    <string name="text_to_read_label">Type the text to read</string>
+    <string name="read_text">Read Text</string>
+    <string name="timer_default">00:00</string>
+    <string name="text_to_read_when_recording">Please read this text while recording: lasdsdfs skjdfhdskjfhds skdfjhsdkjfhdskf sdfjhsdkfjhsdk sdkfjhsdkjfhsdkj ksdjhfskdjhfkdsjhf skdjfhskdjfhdksjfh skjdfhdskjfhskdjfh skdjfhdskjfhksdh skdjfhsdkjfhdsk</string>
 </resources>

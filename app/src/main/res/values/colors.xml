@@ -9,4 +9,5 @@
     <color name="colorIcons">#FFFFFF</color>
     <color name="colorDivider">#BDBDBD</color>
     <color name="color_launcher">#26A69A</color>
+    <color name="color_warning">#ffcc00</color>
 </resources>
