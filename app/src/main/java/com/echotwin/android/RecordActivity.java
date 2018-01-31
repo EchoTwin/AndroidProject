@@ -113,7 +113,7 @@ public class RecordActivity extends AppCompatActivity implements
                     userNameTextInput.setError("Username is required!");
                 } else {
                     Firebase userId = mRef.push();
-                    Firebase username = userId.child("username");
+                    Firebase username = userId.child("userName");
                     username.setValue(userNameEditText.getText().toString());
                     Firebase voiceFileURL = userId.child("voiceFileURL");
                     voiceFileURL.setValue(voiceFileName);
