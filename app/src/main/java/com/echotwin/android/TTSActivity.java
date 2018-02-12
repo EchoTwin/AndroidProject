@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
@@ -14,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -32,9 +34,10 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
-public class TTSActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener, MediaPlayer.OnPreparedListener {
+public class TTSActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener, MediaPlayer.OnPreparedListener, TextToSpeech.OnInitListener {
 
     private ArrayList<User> voicesList;
     private UserAdapter adapter;
@@ -42,6 +45,10 @@ public class TTSActivity extends AppCompatActivity implements View.OnClickListen
     private MediaPlayer mMediaplayer;
     private AppCompatSpinner voicesSpinner;
     private FirebaseAuth mAuth;
+    private DatabaseReference databaseRef;
+    private TextToSpeech tts;
+    private TextInputEditText textToRead;
+    private Button readText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,41 +58,44 @@ public class TTSActivity extends AppCompatActivity implements View.OnClickListen
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        tts = new TextToSpeech(this, this);
+
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             signInAnonymously();
-        }
+        } else {
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            databaseRef = database.getReference();
+            databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    collectUsers(dataSnapshot);
+                    adapter.notifyDataSetChanged();
+                }
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference databaseRef = database.getReference();
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Failed to read value
+                    Log.w(TTSActivity.this.getLocalClassName(), "Failed to read value.", error.toException());
+                }
+            });
+        }
 
         voicesList = new ArrayList<>();
 
         voicesSpinner = findViewById(R.id.voices_spinner);
         ImageButton playSampleVoice = findViewById(R.id.play_sample_voice);
-        TextInputEditText mEditText = findViewById(R.id.text);
+        textToRead = findViewById(R.id.text);
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
+        readText = findViewById(R.id.read_text);
 
         adapter = new UserAdapter(this, voicesList);
         voicesSpinner.setAdapter(adapter);
 
-        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                collectUsers(dataSnapshot);
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TTSActivity.this.getLocalClassName(), "Failed to read value.", error.toException());
-            }
-        });
-
         floatingActionButton.setOnClickListener(this);
         playSampleVoice.setOnClickListener(this);
+        readText.setOnClickListener(this);
     }
 
     private void signInAnonymously() {
@@ -93,6 +103,21 @@ public class TTSActivity extends AppCompatActivity implements View.OnClickListen
             @Override
             public void onSuccess(AuthResult authResult) {
                 // do your stuff
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                databaseRef = database.getReference();
+                databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        collectUsers(dataSnapshot);
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w(TTSActivity.this.getLocalClassName(), "Failed to read value.", error.toException());
+                    }
+                });
             }
         }).addOnFailureListener(this, new OnFailureListener() {
             @Override
@@ -137,6 +162,39 @@ public class TTSActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     @Override
+    public void onDestroy() {
+        // Don't forget to shutdown tts!
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            int result = tts.setLanguage(Locale.US);
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "This Language is not supported");
+            } else {
+                readText.setEnabled(true);
+                speakOut();
+            }
+        } else {
+            Log.e("TTS", "Initilization Failed!");
+        }
+    }
+
+    private void speakOut() {
+        String text = textToRead.getText().toString();
+        tts.setPitch(0.1f);
+        tts.setSpeechRate(0.1f);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+    }
+
+    @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
         User c = adapter.getItem(position);
         sampleVoiceFilePath = c.getUserVoice();
@@ -159,6 +217,9 @@ public class TTSActivity extends AppCompatActivity implements View.OnClickListen
                 sampleVoiceFilePath = adapter.getItem(voicesSpinner.getSelectedItemPosition()).getUserVoice();
                 Log.d("kot", sampleVoiceFilePath);
                 playSampleVoice(sampleVoiceFilePath);
+                break;
+            case R.id.read_text:
+                speakOut();
                 break;
             default:
                 break;

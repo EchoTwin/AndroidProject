@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "846619810567-0gjg2gljppstiun7lsqtfmqug9ib8ffv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.echotwin.android",
+            "certificate_hash": "f5b18bf5013c7e39c4d12a4a2b16cdd3a581e03a"
+          }
+        },
+        {
+          "client_id": "846619810567-muu5laagiabb1cv0qo0n2ubfnr3ot9t8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.echotwin.android",
+            "certificate_hash": "39ead1b3a127e119430674c923b8abd0e2455459"
+          }
+        },
+        {
           "client_id": "846619810567-hmqahp3c5mvefbarlihl9g01s5n541oe.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -39,6 +55,13 @@
         "appinvite_service": {
           "status": 2,
           "other_platform_oauth_client": [
+            {
+              "client_id": "846619810567-c0i0phke579r8u722krlek9f1mgman0a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.echotwin.ios.EchoTwin"
+              }
+            },
             {
               "client_id": "846619810567-0hrm0j00cifqjil39vhjhelpe0u1e7di.apps.googleusercontent.com",
               "client_type": 3
